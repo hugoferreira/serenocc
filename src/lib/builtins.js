@@ -19,6 +19,7 @@ function _cons(a, b) { return [a, b] }
 function _head(l) { const [h, _] = l; return h }
 function _tail(l) { const [_, t] = l; return t }
 
-function _debug(e) { console.log(e) }
+function _debug(e) { console.debug(e) }
+function _write(e) { console.log(e) }
 
 function _atom_bool(a) { return typeof(a) === 'number' || Array.isArray(a) }

@@ -8,8 +8,9 @@ type Number = { type: 'number', value: number }
 type Symbol = { type: 'symbol', value: string }
 type List = { type: 'list', elements: Expression[] }
 type Call = { type: 'call', func: Symbol, args: Expression[] }
-type Expression = Number | Symbol | DefLet | Conditional | Call | List
+type Expression = Number | Symbol | DefLet | Conditional | Call | List | Lambda
 type DefFun = { type: 'deffun', name: Symbol, args: Symbol[], body: Expression }
+type Lambda = { type: 'lambda', args: Symbol[], body: Expression }
 type DefVar = { type: 'defvar', name: Symbol, body: Expression }
 type DefLet = { type: 'deflet', defs: DefFun | DefVar, body: Expression }
 type Conditional = { type: 'if', test: Expression, then: Expression, else: Expression }
@@ -21,6 +22,7 @@ interface Language {
     anExpression: Expression
     aFunction: DefFun
     aLet: DefLet
+    aLambda: Lambda,
     aList: List
     aDefinition: DefVar
     aConditional: Conditional
@@ -49,13 +51,16 @@ const language = P.createLanguage<Language>({
     aList: p => bExpr(p.anExpression.many())
         .map(m => ({ type: 'list', elements: m })),
 
+    aLambda: p => sExpr(P.seq(bExpr(p.aSymbol.many()), p.anExpression))
+        .map(m => ({ type: 'lambda', args: m[0], body: m[1] })),
+
     aFunction: p => sExpr(P.seq(p.aSymbol.skip(P.string(':')), bExpr(p.aSymbol.many()), p.anExpression))
         .map(m => ({ type: 'deffun', name: m[0], args: m[1], body: m[2] })),
 
     aDefinition: p => sExpr(P.seq(p.aSymbol.skip(P.string(':')), p.anExpression))
         .map(m => ({ type: 'defvar', name: m[0], body: m[1] })),
 
-    anExpression: p => P.alt(p.aNumber, p.aSymbol, p.aLet, p.aConditional, p.aCall, p.aList).or(sExpr(p.anExpression))
+    anExpression: p => P.alt(p.aNumber, p.aSymbol, p.aLet, p.aConditional, p.aCall, p.aList, p.aLambda).or(sExpr(p.anExpression))
         .trim(P.optWhitespace),
 
     aProgram: p => P.alt(p.aFunction, p.aDefinition, p.anExpression).trim(P.optWhitespace).many()
@@ -73,6 +78,7 @@ function t(e: Expression | DefFun | DefVar): string {
         case 'call':   return `${t(e.func)}(${e.args.map(t).join(', ')})`
         case 'defvar': return `const ${t(e.name)} = ${t(e.body)}`
         case 'deflet': return `(() => { ${t(e.defs)}; return ${t(e.body)} })()`
+        case 'lambda': return `((${e.args.map(t).join(', ')}) => { return ${t(e.body)}})`
         case 'deffun': return `function ${t(e.name)}(${e.args.map(t).join(', ')}) { return ${t(e.body)} }`
         case 'list':   return t(e.elements.concat({ type: 'symbol', value: 'nil' })
                                  .reduceRight((e, acc) => ({ type: 'call', func: { type: 'symbol', value: 'cons' }, args: [acc, e] })))
