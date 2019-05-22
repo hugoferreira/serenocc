@@ -9,7 +9,7 @@
 
 (length: [l]
     (if (empty? l) 0
-        (add 1 (length (tail l)))))
+        (add 1 (l |> tail |> length))))
 
 (nth: [l i]
     (if (zero? i) (head l)
@@ -31,8 +31,9 @@
                (f (head ll) (foldaux (tail ll) res))))
        (foldaux l b)))
 
-(reverse: [l f] (reduce nil l ([acc e] (cons e acc))))
+(reverse: [l] (reduce nil l ([acc e] (cons e acc))))
 (filter: [l f] (reduceR nil l ([e acc] (if (f e) (cons e acc) acc))))
+(last?: [l] (head l |> reverse))
 
 (debug (map [1 2 3] ([x] (add x 3))))
 (debug (reverse [1 2 3]))

@@ -8,7 +8,8 @@ type Number = { type: 'number', value: number }
 type Symbol = { type: 'symbol', value: string }
 type List = { type: 'list', elements: Expression[] }
 type Call = { type: 'call', func: Symbol, args: Expression[] }
-type Expression = Number | Symbol | DefLet | Conditional | Call | List | Lambda
+type Pipe = { type: 'pipe', exp: Expression, f: Symbol }
+type Expression = Number | Symbol | DefLet | Conditional | Call | List | Lambda | Pipe
 type DefFun = { type: 'deffun', name: Symbol, args: Symbol[], body: Expression }
 type Lambda = { type: 'lambda', args: Symbol[], body: Expression }
 type DefVar = { type: 'defvar', name: Symbol, body: Expression }
@@ -22,8 +23,10 @@ interface Language {
     anExpression: Expression
     aFunction: DefFun
     aLet: DefLet
-    aLambda: Lambda,
+    aLambda: Lambda
     aList: List
+    aPipe: Pipe
+    nonPipe: Exclude<Expression, Pipe>
     aDefinition: DefVar
     aConditional: Conditional
     aProgram: Array<DefFun | DefVar | Expression>
@@ -59,9 +62,13 @@ const language = P.createLanguage<Language>({
 
     aDefinition: p => sExpr(P.seq(p.aSymbol.skip(P.string(':')), p.anExpression))
         .map(m => ({ type: 'defvar', name: m[0], body: m[1] })),
+    
+    aPipe: p => P.seq(p.nonPipe, (P.string('|>').then(p.aSymbol).atLeast(1)))
+        .map(m => (m[1].reduce((acc, e) => ({ type: 'pipe', f: e, exp: acc }), m[0] as Expression)) as Pipe),
 
-    anExpression: p => P.alt(p.aNumber, p.aSymbol, p.aLet, p.aConditional, p.aCall, p.aList, p.aLambda).or(sExpr(p.anExpression))
-        .trim(P.optWhitespace),
+    nonPipe: p => P.alt(p.aNumber, p.aSymbol, p.aLet, p.aConditional, p.aCall, p.aList, p.aLambda),
+
+    anExpression: p => p.aPipe.or(sExpr(p.anExpression)).or(p.nonPipe).trim(P.optWhitespace),
 
     aProgram: p => P.alt(p.aFunction, p.aDefinition, p.anExpression).trim(P.optWhitespace).many()
 })
@@ -79,6 +86,7 @@ function t(e: Expression | DefFun | DefVar): string {
         case 'defvar': return `const ${t(e.name)} = ${t(e.body)}`
         case 'deflet': return `(() => { ${t(e.defs)}; return ${t(e.body)} })()`
         case 'lambda': return `((${e.args.map(t).join(', ')}) => { return ${t(e.body)}})`
+        case 'pipe':   return `${t(e.f)}(${t(e.exp)})`
         case 'deffun': return `function ${t(e.name)}(${e.args.map(t).join(', ')}) { return ${t(e.body)} }`
         case 'list':   return t(e.elements.concat({ type: 'symbol', value: 'nil' })
                                  .reduceRight((e, acc) => ({ type: 'call', func: { type: 'symbol', value: 'cons' }, args: [acc, e] })))
