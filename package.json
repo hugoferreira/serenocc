@@ -1,0 +1,25 @@
+{
+    "name": "minimalistic-pl",
+    "version": "1.0.0",
+    "description": "",
+    "author": "Sereno",
+    "license": "ISC",
+    "main": "main.js",
+    "dependencies": {
+        "command-line-args": "^5.1.1",
+        "parsimmon": "^1.12.0"
+    },
+    "devDependencies": {
+        "@types/command-line-args": "^5.0.0",
+        "@types/node": "^12.0.2",
+        "@types/parsimmon": "^1.10.0",
+        "typescript": "^3.5.0-rc"
+    },
+    "scripts": {
+        "build": "tsc",
+        "start": "node build/main.js"
+    },
+    "bin": {
+        "serenocc": "build/main.js"
+    }
+}
