@@ -81,13 +81,13 @@ function t(e: Expression | DefFun | DefVar): string {
     switch (e.type) {
         case 'number': return e.value.toString()
         case 'symbol': return `_${e.value.replace('?', '_bool')}`
-        case 'if':     return `((${t(e.test)}) ? (${t(e.then)}) : (${t(e.else)}))`
-        case 'call':   return `${t(e.func)}(${e.args.map(t).join(', ')})`
-        case 'defvar': return `const ${t(e.name)} = ${t(e.body)}`
-        case 'deflet': return `(() => { ${t(e.defs)}; return ${t(e.body)} })()`
-        case 'lambda': return `((${e.args.map(t).join(', ')}) => { return ${t(e.body)}})`
+        case 'if':     return `(${t(e.test)}) ? (${t(e.then)}) : (${t(e.else)})`
+        case 'call':   return `${t(e.func)}${e.args.map(a => `(${t(a)})`).join('')}`
+        case 'deflet': return `{ ${t(e.defs)}; return ${t(e.body)} }`
+        case 'lambda': return `${e.args.map(t).join(' => ')} => ${t(e.body)}`
         case 'pipe':   return `${t(e.f)}(${t(e.exp)})`
-        case 'deffun': return `function ${t(e.name)}(${e.args.map(t).join(', ')}) { return ${t(e.body)} }`
+        case 'defvar': return `const ${t(e.name)} = ${t(e.body)}`
+        case 'deffun': return `const ${t(e.name)} = ${e.args.map(t).join(' => ')} => ${t(e.body)}`
         case 'list':   return t(e.elements.concat({ type: 'symbol', value: 'nil' })
                                  .reduceRight((e, acc) => ({ type: 'call', func: { type: 'symbol', value: 'cons' }, args: [acc, e] })))
         default:       return ''

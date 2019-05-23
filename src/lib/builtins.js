@@ -1,25 +1,25 @@
 const _nil = []
+const _true = true
+const _false = false
 
-function _eq_bool(a, b) { return a === b }
-function _lt_bool(a, b) { return a < b }
-function _lte_bool(a, b) { return a <= b }
-function _gt_bool(a, b) { return a > b }
-function _gte_bool(a, b) { return a >= b }
+const _eq_bool = a => b => a === b
+const _lt_bool = a => b => a < b 
+const _lte_bool = a => b => a <= b 
+const _gt_bool = a => b => a > b 
+const _gte_bool = a => b => a >= b 
 
-function _and(a, b) { return a && b }
-function _or(a, b) { return a || b }
-function _not(a) { return !a }
+const _and = a => b => a && b 
+const _or = a => b => a || b 
+const _not = a => !a 
 
-function _fst(...args) { return args[0] }
-function _snd(...args) { return args[1] }
-function _add(a, b) { return a + b }
-function _sub(a, b) { return a - b }
+const _add = a => b => a + b
+const _sub = a => b => a - b
 
-function _cons(a, b) { return [a, b] }
-function _head(l) { const [h, _] = l; return h }
-function _tail(l) { const [_, t] = l; return t }
+const _cons = a => b => [a, b]
+const _head = l => l[0]
+const _tail = l => l[1]
 
-function _debug(e) { console.debug(e) }
-function _write(e) { console.log(e) }
+const _debug = e => console.debug(e)
+const _write = e => console.log(e)
 
-function _atom_bool(a) { return typeof(a) === 'number' || Array.isArray(a) }
+const _atom_bool = a => typeof(a) === 'number' || Array.isArray(a) 
