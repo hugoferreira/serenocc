@@ -8,9 +8,9 @@
     (if (empty? l) 0
         (add 1 (l |> tail |> length))))
 
-(nth: [l i]
+(nth: [i l]
     (if (zero? i) (head l)
-        (nth (tail l) (sub i 1))))
+        (nth (sub i 1) (tail l))))
 
 (map: [f l]
     (if (empty? l) []
@@ -30,9 +30,11 @@
 
 (reverse: (reduce nil ([acc e] (cons e acc))))
 (filter: [f] (reduceR nil ([e acc] (if (f e) (cons e acc) acc))))
-(last?: [l] (head l |> reverse))
+(last?: [l] (l |> reverse |> head))
 
 (debug (map (add 3) [1 2 3]))
 (debug (reverse [1 2 3]))
 (debug (filter (lte? 4) [1 2 3 4 5 6]))
-(reduce 0 add [1 2 3])
+(debug (reduce 0 add [1 2 3]))
+(debug (last? [1 2 3 4 5]))
+(debug (nth 3 [1 2 3 4 5]))

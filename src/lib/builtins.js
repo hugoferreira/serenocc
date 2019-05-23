@@ -14,6 +14,9 @@ const _not = a => !a
 
 const _add = a => b => a + b
 const _sub = a => b => a - b
+const _mul = a => b => a * b
+const _div = a => b => a / b
+const _mod = a => b => a % b
 
 const _cons = a => b => [a, b]
 const _head = l => l[0]
