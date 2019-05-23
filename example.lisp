@@ -16,17 +16,17 @@
     (if (empty? l) []
         (cons (f (head l)) (map f (tail l)))))
 
-(reduce: [b f l]
-  (let (foldaux: [ll res]
-           (if (empty? ll) res               
-               (foldaux (tail ll) (f res (head ll)))))
-       (foldaux l b)))
+(reduce: [b f]
+  (let (foldaux: [res l]
+           (if (empty? l) res               
+               (foldaux (f res (head l)) (tail l))))
+       (foldaux b)))
 
-(reduceR: [b f l]
-  (let (foldaux: [ll res]
-           (if (empty? ll) res               
-               (f (head ll) (foldaux (tail ll) res))))
-       (foldaux l b)))
+(reduceR: [b f]
+  (let (foldaux: [res l]
+           (if (empty? l) res               
+               (f (foldaux (tail l) res) (head l))))
+       (foldaux b)))
 
 (reverse: (reduce nil ([acc e] (cons e acc))))
 (filter: [f] (reduceR nil ([e acc] (if (f e) (cons e acc) acc))))
